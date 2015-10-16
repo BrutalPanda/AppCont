@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:clickable="true"
+        android:background="@color/background"
+        android:gravity="left">
+
+        <Spinner
+            android:id="@+id/spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        </Spinner>
+        <TableLayout android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:stretchColumns="*" >
+            <TableRow
+                android:baselineAligned="true"
+                android:layout_margin="2dip"
+                android:clickable="false">
+                <TextView android:text="Место установки"  />
+                <TextView android:id="@+id/metering_place" android:text="sometext" />
+
+            </TableRow>
+            <TableRow
+                android:baselineAligned="true"
+                android:layout_margin="2dip"
+                android:clickable="false">
+                <TextView android:text="Тип прибора"  />
+                <TextView android:id="@+id/metering_type" android:text="sometext" />
+
+            </TableRow>
+            <TableRow
+                android:baselineAligned="true"
+                android:layout_margin="2dip"
+                android:clickable="false">
+                <TextView android:text="Заводской номер"  />
+                <TextView android:id="@+id/metering_factory_num" android:text="sometext" />
+
+            </TableRow>
+            <TableRow
+                android:baselineAligned="true"
+                android:layout_margin="2dip"
+                android:clickable="false">
+                <TextView android:text="Количество знаков"  />
+                <TextView android:id="@+id/metering_accuracy" android:text="sometext" />
+
+            </TableRow>
+            <TableRow
+                android:baselineAligned="true"
+                android:layout_margin="2dip"
+                android:clickable="false">
+                <TextView android:text="Сл. госпроверка"  />
+                <TextView android:id="@+id/metering_next_chek" android:text="sometext" />
+
+            </TableRow>
+            <TableRow
+                android:baselineAligned="true"
+                android:layout_margin="2dip"
+                android:clickable="false">
+                <TextView android:text="Последнее показание"  />
+                <TextView android:id="@+id/metering_prev_reading" android:text="sometext" />
+
+            </TableRow>
+            <TableRow
+                android:baselineAligned="true"
+                android:layout_margin="2dip"
+                android:clickable="false">
+                <TextView android:text="Тип показания"  />
+                <TextView android:id="@+id/metering_type_reading" android:text="sometext" />
+
+            </TableRow>
+            <TableRow
+                android:baselineAligned="true"
+                android:layout_margin="2dip"
+                android:clickable="false">
+                <TextView android:text="Дата показания"  />
+                <TextView android:id="@+id/metering_prev_reading_date" android:text="sometext" />
+
+            </TableRow>
+            <TableRow
+                android:baselineAligned="true"
+                android:layout_margin="2dip"
+                android:clickable="false">
+                <TextView android:text="Текущее показание"  />
+                <TextView android:id="@+id/metering_current_reading" android:text="sometext" />
+
+            </TableRow>
+            <TableRow
+                android:baselineAligned="true"
+                android:layout_margin="2dip"
+                android:clickable="false">
+                <TextView android:text="Комментарий"  />
+                <EditText android:id="@+id/metering_comment" android:text="" />
+
+            </TableRow>
+        </TableLayout>
+
+
+
+
+    </LinearLayout>
+</ScrollView>

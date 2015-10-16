@@ -1,0 +1,29 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:orientation="vertical">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Подготовить данные к загрузке"
+            android:id="@+id/setReadyToUpload"
+            android:layout_marginBottom="96dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Сброс выполненных заданий"
+            android:id="@+id/restoreTask"
+            android:layout_above="@+id/setReadyToUpload"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="176dp" />
+    </RelativeLayout>
+</LinearLayout>

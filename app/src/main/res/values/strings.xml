@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Приложение контролеров</string>
+
+    <!-- Navigation Drawer-->
+    <string name="info_fr1">Задание</string>
+    <string name="info_fr2">Выполненные</string>
+    <string name="info_fr3">Служебное</string>
+    <string name="info_fr4">Фрагмент 4</string>
+    <string name="provider_gps">GPS</string>
+    <string name="location_settings">Location settings</string>
+</resources>

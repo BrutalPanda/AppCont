@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="@color/background"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Информация об абоненте"
+            android:layout_margin="10dip"
+            android:textSize="40sp"
+            android:id="@+id/textView"
+            android:layout_gravity="center_horizontal" />
+
+        <TableLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:stretchColumns="*"
+            android:layout_gravity="center_horizontal">
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_margin="2dip"
+                android:layout_height="wrap_content">
+                <TextView android:text="Абонент" android:background="@color/background"  android:textAppearance="?android:attr/textAppearanceMedium"/>
+                <TextView android:id="@+id/account_abonent" android:background="@color/background" android:text="sometext" android:textAppearance="?android:attr/textAppearanceMedium"/>
+            </TableRow>
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_margin="2dip"
+                android:layout_height="wrap_content">
+                <TextView android:text="Площадь" android:background="@color/background" android:textAppearance="?android:attr/textAppearanceMedium" />
+                <TextView android:id="@+id/account_area" android:background="@color/background" android:text="sometext" android:textAppearance="?android:attr/textAppearanceMedium"/>
+            </TableRow>
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_margin="2dip"
+                android:layout_height="wrap_content">
+                <TextView android:text="Комнат" android:background="@color/background"  android:textAppearance="?android:attr/textAppearanceMedium"/>
+                <TextView android:id="@+id/account_room" android:background="@color/background" android:text="sometext" android:textAppearance="?android:attr/textAppearanceMedium"/>
+            </TableRow>
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_margin="2dip"
+                android:layout_height="wrap_content">
+                <TextView android:text="Проживающих" android:background="@color/background"  android:textAppearance="?android:attr/textAppearanceMedium"/>
+                <TextView android:id="@+id/account_living_people" android:background="@color/background" android:text="sometext" android:textAppearance="?android:attr/textAppearanceMedium" />
+            </TableRow>
+        </TableLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Контактная информация"
+            android:layout_margin="10dip"
+            android:textSize="40sp"
+            android:id="@+id/textView2"
+            android:layout_gravity="center_horizontal" />
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stretchColumns="2,4,1"
+            android:layout_gravity="end">
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_margin="2dip"
+                android:layout_height="wrap_content"
+                android:baselineAligned="true">
+                <TextView android:text="Телефон" android:background="@color/background"  android:textAppearance="?android:attr/textAppearanceMedium"/>
+                <ImageView android:src="@drawable/call" android:id="@+id/account_tel1_img" android:clickable="true"/>
+                <EditText android:id="@+id/account_tel1"  android:text="12345" android:textAppearance="?android:attr/textAppearanceMedium" />
+            </TableRow>
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_margin="2dip"
+                android:layout_height="wrap_content" android:baselineAligned="true">
+                <TextView android:text="Телефон" android:background="@color/background"  android:textAppearance="?android:attr/textAppearanceMedium"/>
+                <ImageView android:src="@drawable/call" android:id="@+id/account_tel2_img" android:clickable="true"/>
+                <EditText android:id="@+id/account_tel2"  android:text="54321" android:textAppearance="?android:attr/textAppearanceMedium" />
+            </TableRow>
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_margin="2dip"
+                android:layout_height="wrap_content" android:baselineAligned="true">
+                <TextView android:text="Телефон" android:background="@color/background"  android:textAppearance="?android:attr/textAppearanceMedium"/>
+                <ImageView android:src="@drawable/call" android:id="@+id/account_tel3_img" android:clickable="true"/>
+                <EditText android:id="@+id/account_tel3" android:text="112233" android:textAppearance="?android:attr/textAppearanceMedium" />
+            </TableRow>
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_margin="2dip"
+                android:layout_height="wrap_content" android:baselineAligned="true">
+                <TextView android:text="E-mail" android:background="@color/background"  android:textAppearance="?android:attr/textAppearanceMedium"/>
+                <ImageView android:src="@drawable/email" android:id="@+id/account_email_img" android:clickable="true"/>
+                <EditText android:id="@+id/account_email" android:text="some@te.xt" android:textAppearance="?android:attr/textAppearanceMedium" />
+            </TableRow>
+
+
+        </TableLayout>
+
+
+    </LinearLayout>
+</ScrollView>

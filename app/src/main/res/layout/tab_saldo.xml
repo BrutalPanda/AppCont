@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:clickable="true"
+        android:background="@color/background"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Данные сальдо"
+            android:layout_margin="10dip"
+            android:textSize="40sp"
+            android:id="@+id/textView"
+            android:layout_gravity="center_horizontal" />
+        <HorizontalScrollView android:layout_width="fill_parent"
+            android:gravity="center"
+            android:layout_height="fill_parent">
+            <TableLayout
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:gravity="center"
+                android:stretchColumns="*"
+                android:id="@+id/saldo_table"
+                android:background="#000000">
+
+
+
+            </TableLayout>
+        </HorizontalScrollView>
+
+
+
+    </LinearLayout>
+</ScrollView>
