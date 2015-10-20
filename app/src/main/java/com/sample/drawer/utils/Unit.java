@@ -10,6 +10,8 @@ import java.util.ArrayList;
  */
 public class Unit implements Parcelable {
     //Главная инфа
+    public int id;
+    public int passed;
     public String FIO;
     public String area;
     public String room;
@@ -19,6 +21,7 @@ public class Unit implements Parcelable {
     public String tel1;
     public String tel2;
     public String tel3;
+    public String tel4;
     public String email;
     //Инфа по Сальдо!
     public ArrayList<Saldo> saldo;
@@ -30,6 +33,8 @@ public class Unit implements Parcelable {
     }
 
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeInt(id);
+        parcel.writeInt(passed);
         parcel.writeString(FIO);
         parcel.writeString(area);
         parcel.writeString(room);
@@ -39,6 +44,7 @@ public class Unit implements Parcelable {
         parcel.writeString(tel1);
         parcel.writeString(tel2);
         parcel.writeString(tel3);
+        parcel.writeString(tel4);
         parcel.writeString(email);
         parcel.writeTypedList(devices);
         parcel.writeTypedList(saldo);
@@ -60,6 +66,8 @@ public class Unit implements Parcelable {
     private Unit (Parcel parcel){
         devices = new ArrayList<MeteringDevice>();
         saldo = new ArrayList<Saldo>();
+        id = parcel.readInt();
+        passed = parcel.readInt();
         FIO = parcel.readString();
         area = parcel.readString();
         room = parcel.readString();
@@ -69,6 +77,7 @@ public class Unit implements Parcelable {
         tel1 = parcel.readString();
         tel2 = parcel.readString();
         tel3 = parcel.readString();
+        tel4 = parcel.readString();
         email = parcel.readString();
         parcel.readTypedList(devices, MeteringDevice.CREATOR);
         parcel.readTypedList(saldo, Saldo.CREATOR);

@@ -90,12 +90,9 @@ public class TabMetering_locked extends Activity {
         tv6.setText(md.prev_reading);
         tv7.setText(md.date_reading);
         tv8.setText(md.type_reading);
-        try {
-            tv9.setText(getCurrentReading(data.FIO+" "+data.account,md.factory_num));
-            tv10.setText(getCurrentComment(data.FIO+" "+data.account,md.factory_num));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        tv9.setText(md.cur_reading);
+        tv10.setText(md.comment);
+
 
         try {
             int cur = 0;
@@ -113,82 +110,18 @@ public class TabMetering_locked extends Activity {
 
     }
 
-    private String getCurrentReading(String FIOLS, String FN) throws JSONException {
-        String out_data = readOutFile().replaceAll("\"\"","\",\"");
-        /*if (out_data.split("cur_reading").length==2){
-            out_data = out_data.replaceFirst(",","");
-        }*/
-        JSONArray jarr = new JSONArray(out_data);
-        for (int i=0;i<jarr.length();i++){
-            JSONObject c = jarr.getJSONObject(i);
-            if (c.getString("fiols").equals(FIOLS)&&c.getString("num").equals(FN)){
-                return c.getString("cur_reading");
-            }
-        }
-        return "";
-    }
 
-    private String getCurrentComment(String FIOLS, String FN) throws JSONException {
-        String out_data = readOutFile().replaceAll("\"\"","\",\"");
-        /*if (out_data.split("cur_reading").length==2){
-            out_data = out_data.replaceFirst(",","");
-        }*/
-        JSONArray jarr = new JSONArray(out_data);
-        for (int i=0;i<jarr.length();i++){
-            JSONObject c = jarr.getJSONObject(i);
-            if (c.getString("fiols").equals(FIOLS)&&c.getString("num").equals(FN)){
-                return c.getString("comment");
-            }
-        }
-        return "";
-    }
 
 
     private String[] getDeviceNames(){
         ArrayList<MeteringDevice> mds = data.devices;
-        String out_data = readOutFile();
-
-        String out[] = out_data.split("\\{");
-        ArrayList<String> namesList = new ArrayList<String>();
-
-        for (int i=0; i<mds.size();i++){
-            boolean contain = false;
-            for (int j=0;j<out.length;j++){
-                if (out[j].contains(data.FIO+" "+data.account)){
-                    if (out[j].contains(mds.get(i).factory_num)){
-                        contain = true;
-                    }
-                }
-            }
-            if (contain) {
-                namesList.add( mds.get(i).name);
-            }
-        }
-        String[] names = new String[namesList.size()];
-        for (int i=0;i<namesList.size();i++){
-            names[i] = namesList.get(i);
+        String names[] = new String[data.devices.size()];
+        for (int i=0;i<data.devices.size();i++){
+            names[i] = data.devices.get(i).name;
         }
         return names;
     }
 
-    private String readOutFile(){
-        String ret = "";
-        try {
-            // ��������� ����� ��� ������
-            BufferedReader br = new BufferedReader(new InputStreamReader(
-                    openFileInput("out_file")));
-            String str = "";
-            // ������ ����������
-            while ((str = br.readLine()) != null) {
-                ret = ret + str;
 
-            }
-        } catch (FileNotFoundException e) {
-            return "";
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return ret;
-    }
 
 }

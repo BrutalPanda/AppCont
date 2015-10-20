@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.sample.drawer.MyShitMasterpice.DB;
 import com.sample.drawer.R;
 import com.sample.drawer.utils.MeteringDevice;
 import com.sample.drawer.utils.Saldo;
@@ -38,22 +39,19 @@ import java.util.HashMap;
 public class Fragment3 extends Fragment {
     Context this_context;
     Fragment RealyThis = this;
+    DB dbase;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         this_context = container.getContext();
-        //
+        dbase = new DB(this_context);
         final View rootView =
                 inflater.inflate(R.layout.fragment_3, container, false);
         Button restoreButton = (Button) rootView.findViewById(R.id.restoreTask);
         restoreButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    clearFile();
-                    Toast.makeText(getActivity(), "Данные успешно обнулены!", Toast.LENGTH_SHORT).show();
-                } catch (IOException e) {
-                    Toast.makeText(getActivity(), "Ошибка в обнулении данных!", Toast.LENGTH_SHORT).show();
-                }
+                dbase.clearData();
+
             }
         });
 
@@ -113,36 +111,7 @@ public class Fragment3 extends Fragment {
         ratingdialog.show();
     }
 
-    private void clearFile() throws IOException {
-         try {
-            // отрываем поток для записи
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
-                    getActivity().openFileOutput("out_file", getActivity().MODE_PRIVATE)));
-            // пишем данные
-            bw.write("");
-            // закрываем поток
-            bw.close();
-            // Log.d(LOG_TAG, "Файл записан");
-        } catch (FileNotFoundException e) {
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            // отрываем поток для записи
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
-                    getActivity().openFileOutput("GPSTrack", getActivity().MODE_PRIVATE)));
-            // пишем данные
-            bw.write("");
-            // закрываем поток
-            bw.close();
-            // Log.d(LOG_TAG, "Файл записан");
-        } catch (FileNotFoundException e) {
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     private void makeFile() throws  JSONException{
         String gps_data = readFile("GPSTrack");
@@ -176,42 +145,8 @@ public class Fragment3 extends Fragment {
     }
 
     private JSONArray makeMainData () throws JSONException{
-        JSONArray jarr = new JSONArray();
-        ArrayList<Unit> units = loadBaseData();
-
-        ArrayList<HashMap<String,String>> reading = loadReadings();
-        for (int i=0;i<units.size();i++){
-            JSONObject jobj = new JSONObject();
-            jobj.put("fio", units.get(i).FIO);
-            jobj.put("ls", units.get(i).account);
-            ArrayList<MeteringDevice> md = units.get(i).devices;
-            boolean write = false;
-            JSONArray devs = new JSONArray();
-            for (int j=0;j<reading.size();j++){
-                String fiols = units.get(i).FIO+" "+units.get(i).account;
-                if (fiols.equals(reading.get(j).get("fiols").replaceAll("\"", "\\\""))){
-                    write = true;
-                    for (int k=0;k<md.size();k++){
-                        if (md.get(k).factory_num.equals(reading.get(j).get("num"))){
-                            JSONObject dev = new JSONObject();
-                            dev.put("num",reading.get(j).get("num").replaceAll("\"","\\\""));
-                            dev.put("place",reading.get(j).get("place").replaceAll("\"", "\\\""));
-                            dev.put("comment",reading.get(j).get("comment").replaceAll("\"", "\\\""));
-                            dev.put("cur_reading",reading.get(j).get("cur_reading").replaceAll("\"", "\\\""));
-                            dev.put("date", reading.get(j).get("date").replaceAll("\"","\\\""));
-                            devs.put(dev);
-                        }
-                    }
-
-                }
-            }
-            jobj.put("devices",devs);
-            if (write){
-                jarr.put(jobj);
-            }
-
-        }
-        return jarr;
+        dbase = new DB(this_context);
+        return dbase.makeResult();
     }
 
     private ArrayList<HashMap<String,String>> loadReadings() throws JSONException{
@@ -260,10 +195,10 @@ public class Fragment3 extends Fragment {
             ArrayList<MeteringDevice> devs = new ArrayList<MeteringDevice>();
             for (int j=0;j<root_devs_json.length();j++){
                 JSONObject dev_json = root_devs_json.getJSONObject(j);
-                MeteringDevice md = new MeteringDevice(dev_json.getString("name"),dev_json.getString("service"),
+                MeteringDevice md = new MeteringDevice(0,dev_json.getString("name"),dev_json.getString("service"),
                         dev_json.getString("place"),dev_json.getString("type"),dev_json.getString("factory_num"),
                         dev_json.getString("accuracy"),dev_json.getString("next_check"),dev_json.getString("prev_reading"),
-                        dev_json.getString("type_reading"),dev_json.getString("date_reading"),"");
+                        dev_json.getString("type_reading"),dev_json.getString("date_reading"),"","",0);
                 devs.add(md);
             }
             unit.devices = devs;

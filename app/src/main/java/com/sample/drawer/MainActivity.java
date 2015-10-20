@@ -27,6 +27,7 @@ import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.accountswitcher.AccountHeader;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.sample.drawer.MyShitMasterpice.BackgroundService;
+import com.sample.drawer.MyShitMasterpice.DB;
 import com.sample.drawer.MyShitMasterpice.GPSTracker;
 import com.sample.drawer.utils.Unit;
 import com.sample.drawer.utils.Utils;
@@ -48,6 +49,7 @@ public class MainActivity extends ActionBarActivity {
     private Drawer.Result drawerResult = null;
     private AccountHeader.Result headerResult = null;
     private static long back_pressed;
+    ArrayList<Unit> Units = new ArrayList<Unit>();
     final String FILENAME = "file";
     final String LOG_TAG = "MainActivity::::";
     final String[] possible_path = {"/mnt/sdcard0","/mnt/sdcard1","/mnt/sdcard2","/storage/sdcard0","/storage/sdcard1"};
@@ -67,7 +69,20 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         String source = readSourceFile();
-        writeFile(source);
+        DB dbase = new DB(this);
+        try {
+            boolean complete = true;
+            dbase.clearData();
+            dbase.fillTables(source);
+           /* if (dbase.isEmpty()) {
+                complete = dbase.fillTables(source);
+            }*/
+
+
+        } catch (Exception ex){
+            Toast.makeText(this, "Ошибка базы", Toast.LENGTH_LONG);
+        }
+       // writeFile(source);
         // init Drawer & Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 

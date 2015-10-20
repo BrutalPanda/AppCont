@@ -18,6 +18,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.sample.drawer.MyShitMasterpice.DB;
 import com.sample.drawer.R;
 import com.sample.drawer.utils.MeteringDevice;
 import com.sample.drawer.utils.Unit;
@@ -48,33 +49,10 @@ public class TabMetering extends Activity  {
     boolean allow_apply = true;
     Unit data = null;
     String _dev_name;
-
+    DB dbase;
     private void initialize(){
 
-        /*HashMap<String,String> data = new HashMap<String,String>();
-        data.put("Place","Место1");
-        data.put("Type","Тип2");
-        data.put("FacNum","Номер1");
-        data.put("Accuracy","Точность1");
-        data.put("NextCheck","СлПроверка1");
-        data.put("PrevReading","ПредПок1");
-        data.put("TypeReading","ТипПок1");
-        data.put("DateReading","Дата1");
-        data.put("CurReading","000");
 
-        data_by_dev.add(data);
-        HashMap<String,String> data2 = new HashMap<String,String>();
-        data2.put("Place","Место2");
-        data2.put("Type","Тип2");
-        data2.put("FacNum","Номер2");
-        data2.put("Accuracy","Точность2");
-        data2.put("NextCheck","СлПроверка2");
-        data2.put("PrevReading","ПредПок2");
-        data2.put("TypeReading","ТипПок2");
-        data2.put("DateReading","Дата2");
-        data2.put("CurReading","0000");
-
-        data_by_dev.add(data2);*/
 
     }
 
@@ -84,6 +62,10 @@ public class TabMetering extends Activity  {
         // адаптер
         Intent intent = getIntent();
         data = intent.getParcelableExtra("data");
+        if (data.devices==null){
+            Toast.makeText(this.getBaseContext(),"У текущего ЛС нет приборов учета!",Toast.LENGTH_SHORT).show();
+            //setResult(RESULT_OK);
+        }
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, getDeviceNames());
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         //initialize();
@@ -93,7 +75,7 @@ public class TabMetering extends Activity  {
         spinner.setPrompt("Приборы учета");
         // выделяем элемент
         spinner.setSelection(0);
-
+        dbase = new DB(this);
 
 
 
@@ -125,16 +107,12 @@ public class TabMetering extends Activity  {
                 TextView tv2 = (TextView) findViewById(R.id.metering_current_reading);
                 String cur_reading = tv2.getText().toString();
                 TextView tv3 = (TextView) findViewById(R.id.metering_factory_num);
-                TextView tv4= (TextView)findViewById(R.id.metering_prev_reading);
+                TextView tv4= (TextView) findViewById(R.id.metering_prev_reading);
                 String dev_num = (String) tv3.getText();
                 EditText tv5= (EditText)findViewById(R.id.metering_comment);
                 String comment =  tv5.getText().toString();
 
-                //TextView tv4 = (TextView)findViewById(R.id.account_text);
-                //String FIO_LS = tv4.getText().toString();
-                String FIO_LS = data.FIO + " " + data.account;
-                JSONObject tofile = new JSONObject();
-                HashMap<String,String> nd = new HashMap<String, String>();
+
                 int cur = 0;
                 int last = 0;
                 try{last=Integer.parseInt(tv4.getText().toString().trim());}catch(Exception ex){}
@@ -152,33 +130,18 @@ public class TabMetering extends Activity  {
                     tv2.setTextColor(Color.GREEN);
                 }
 
-                try {
-                    tofile.put("place", new_place);
-                    tofile.put("cur_reading", cur_reading);
-                    tofile.put("comment", comment);
-                    nd.put("place", new_place);
-                    nd.put("cur_reading", cur_reading);
-                    nd.put("comment", comment);
-                    new_data.put(_position, nd);
-                    apply.setEnabled(false);
-                    tv1.setFocusable(false);
-                    tv2.setFocusable(false);
-                    tv5.setFocusable(false);
-                    tofile.put("num", dev_num);
+                apply.setEnabled(false);
+                tv1.setFocusable(false);
+                tv2.setFocusable(false);
+                tv5.setFocusable(false);
 
-                    Date d = new Date();
-                    SimpleDateFormat format1 = new SimpleDateFormat("yyyy.MM.dd hh:mm:ss");
-                    tofile.put("date",format1.format(d));
-
-                    tofile.put("fiols", FIO_LS);
-                    writeFile(tofile.toString());
-                    readFile();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                Date d = new Date();
+                SimpleDateFormat format1 = new SimpleDateFormat("yyyy.MM.dd hh:mm:ss");
+                if (dbase.setPassed(data.id,comment,new_place,Integer.parseInt(cur_reading),format1.format(d))) {
+                    Toast.makeText(getBaseContext(), "Запись успешно зафиксирована!", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(getBaseContext(), "Ошибка! Запись не зафиксирована!", Toast.LENGTH_SHORT).show();
                 }
-                Toast.makeText(getBaseContext(), "Запись успешно зафиксирована!", Toast.LENGTH_SHORT).show();
 
             }
         });
@@ -246,95 +209,14 @@ public class TabMetering extends Activity  {
 
     private String[] getDeviceNames(){
         ArrayList<MeteringDevice> mds = data.devices;
-        String out_data = readOutFile();
-        String out[] = out_data.split("\\{");
-        ArrayList<String> namesList = new ArrayList<String>();
-
-        for (int i=0;i<mds.size();i++){
-            boolean contain = false;
-            for (int j=0;j<out.length;j++){
-                if (out[j].contains(data.FIO+" "+data.account)){
-                    if (out[j].contains(mds.get(i).factory_num)){
-                        contain = true;
-                    }
-                }
-            }
-            if (!contain) {
-                namesList.add( mds.get(i).name);
-            }
-        }
-        String[] names = new String[namesList.size()];
-        for (int i=0;i<namesList.size();i++){
-            names[i] = namesList.get(i);
+        String names[] = new String[data.devices.size()];
+        for (int i=0;i<data.devices.size();i++){
+            names[i] = data.devices.get(i).name;
         }
         return names;
     }
 
-    void writeFile(String to) throws IOException {
-        String str=readFile();
-        str = str.replaceAll("]", "").replaceAll("\\[", "");
-       // str = new StringBuffer(str).reverse().toString();
-        str = str.replaceFirst(",", "");
-       // str = new StringBuffer(str).reverse().toString();
 
 
 
-        try {
-            // отрываем поток для записи
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
-                    openFileOutput("out_file", MODE_PRIVATE)));
-            // пишем данные
-            bw.write("["+str+","+to+"]");
-            // закрываем поток
-            bw.close();
-           // Log.d(LOG_TAG, "Файл записан");
-        } catch (FileNotFoundException e) {
-            File file = new File("out_file");
-            file.createNewFile();
-            writeFile(to);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    String readFile() {
-        String ret = "";
-        try {
-            // открываем поток для чтения
-            BufferedReader br = new BufferedReader(new InputStreamReader(
-                    openFileInput("out_file")));
-            String str = "";
-            // читаем содержимое
-            while ((str = br.readLine()) != null) {
-                ret = ret + str;
-
-            }
-            Log.d("FromFileReaded:::::", ret);
-        } catch (FileNotFoundException e) {
-            return "";
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return ret;
-    }
-
-    private String readOutFile(){
-        String ret = "";
-        try {
-            // открываем поток для чтения
-            BufferedReader br = new BufferedReader(new InputStreamReader(
-                   openFileInput("out_file")));
-            String str = "";
-            // читаем содержимое
-            while ((str = br.readLine()) != null) {
-                ret = ret + str;
-
-            }
-        } catch (FileNotFoundException e) {
-            return "";
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return ret;
-    }
 }

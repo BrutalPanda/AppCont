@@ -9,6 +9,7 @@ import java.util.HashMap;
  * Created by Slava-laptop on 27.07.2015.
  */
 public class MeteringDevice implements Parcelable {
+    public int id;
     public String name;
     public String service;
     public String place;
@@ -20,8 +21,10 @@ public class MeteringDevice implements Parcelable {
     public String type_reading;
     public String date_reading;
     public String cur_reading;
+    public String comment;
+    public int passed;
 
-    public MeteringDevice(String _name,String _service,
+    public MeteringDevice(int _id, String _name,String _service,
             String _place,
             String _type,
             String _factory_num,
@@ -30,7 +33,8 @@ public class MeteringDevice implements Parcelable {
             String _prev_reading,
             String _type_reading,
             String _date_reading,
-            String _cur_reading){
+            String _cur_reading, String _comment, int _passed){
+        this.id=_id;
         this.name = _name;
         this.accuracy = _accuracy;
         this.cur_reading = _cur_reading;
@@ -42,6 +46,8 @@ public class MeteringDevice implements Parcelable {
         this.service = _service;
         this.type = _type;
         this.type_reading = _type_reading;
+        this.comment = _comment;
+        this.passed = _passed;
     }
 
     public MeteringDevice (HashMap <String,String> data){
@@ -64,6 +70,7 @@ public class MeteringDevice implements Parcelable {
 
     // упаковываем объект в Parcel
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeInt(id);
         parcel.writeString(name);
         parcel.writeString(type_reading);
         parcel.writeString(type);
@@ -75,6 +82,8 @@ public class MeteringDevice implements Parcelable {
         parcel.writeString(date_reading);
         parcel.writeString(cur_reading);
         parcel.writeString(accuracy);
+        parcel.writeString(comment);
+        parcel.writeInt(passed);
 
     }
 
@@ -90,6 +99,7 @@ public class MeteringDevice implements Parcelable {
     };
 
     private MeteringDevice (Parcel parcel){
+        id = parcel.readInt();
         name = parcel.readString();
         type_reading = parcel.readString();
         type = parcel.readString();
@@ -101,5 +111,7 @@ public class MeteringDevice implements Parcelable {
         date_reading = parcel.readString();
         cur_reading = parcel.readString();
         accuracy = parcel.readString();
+        comment = parcel.readString();
+        passed = parcel.readInt();
     }
 }

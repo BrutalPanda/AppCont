@@ -8,13 +8,18 @@ public class Order {
     private String address;
     private String FIO;
     private String account;
+    private int id;
 
-    public Order (String _address, String _FIO, String _account){
+    public Order (int _id, String _address, String _FIO, String _account){
+        this.id = _id;
         this.address = _address;
         this.FIO = _FIO;
         this.account = _account;
     }
 
+    public int getId() {
+        return id;
+    }
     public String getFIO() {
         return FIO;
     }
