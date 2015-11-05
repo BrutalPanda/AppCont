@@ -8,10 +8,12 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.sample.drawer.MyShitMasterpice.DB;
 import com.sample.drawer.R;
 import com.sample.drawer.utils.MeteringDevice;
 import com.sample.drawer.utils.Unit;
@@ -24,13 +26,16 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by Slava-laptop on 05.08.2015.
  */
 public class TabMetering_locked extends Activity {
     Unit data = null;
+    DB dbase ;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.tab_metering_locked);
@@ -46,7 +51,7 @@ public class TabMetering_locked extends Activity {
         spinner.setPrompt("������� �����");
         // �������� �������
         spinner.setSelection(0);
-
+        dbase = new DB(this);
 
         fillTable(0);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -65,6 +70,38 @@ public class TabMetering_locked extends Activity {
             public void onNothingSelected(AdapterView<?> arg0) {
             }
         });
+
+        findViewById(R.id.metering_comment).setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    EditText tv5 = (EditText) findViewById(R.id.metering_comment);
+                    String comment = tv5.getText().toString();
+                    TextView tv1 = (TextView) findViewById(R.id.metering_place);
+                    String new_place = tv1.getText().toString();
+                    Date d = new Date();
+                    SimpleDateFormat format1 = new SimpleDateFormat("yyyy.MM.dd hh:mm:ss");
+                    dbase.setCommentAndPlace(data.id, comment, new_place, format1.format(d));
+                }
+            }
+        });
+        findViewById(R.id.metering_place).setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    EditText tv5 = (EditText) findViewById(R.id.metering_comment);
+                    String comment = tv5.getText().toString();
+                    TextView tv1 = (TextView) findViewById(R.id.metering_place);
+                    String new_place = tv1.getText().toString();
+                    Date d = new Date();
+                    SimpleDateFormat format1 = new SimpleDateFormat("yyyy.MM.dd hh:mm:ss");
+                    dbase.setCommentAndPlace(data.id, comment, new_place, format1.format(d));
+                }
+            }
+        });
+
+
+
     }
 
 

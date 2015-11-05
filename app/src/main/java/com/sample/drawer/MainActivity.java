@@ -72,8 +72,8 @@ public class MainActivity extends ActionBarActivity {
         DB dbase = new DB(this);
         try {
             boolean complete = true;
-            dbase.clearData();
-            dbase.fillTables(source);
+          //  dbase.clearData();
+          //  dbase.fillTables(source);
            /* if (dbase.isEmpty()) {
                 complete = dbase.fillTables(source);
             }*/

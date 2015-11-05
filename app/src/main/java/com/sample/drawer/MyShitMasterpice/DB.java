@@ -36,8 +36,8 @@ public class DB extends SQLiteOpenHelper {
     String DISPATCHER = "disp";
     final String INFO_AREA = "area";
     final String INFO_ROOM = "room";
-    final String INFO_TEL = "tel";
-    final String INFO_EMAIL = "email";
+    public final String INFO_TEL = "tel";
+    public final String INFO_EMAIL = "email";
     final String INFO_LIVING = "number_of_living";
 
     public DB(Context context){
@@ -52,6 +52,7 @@ public class DB extends SQLiteOpenHelper {
         db.execSQL("create table device (id integer primary key autoincrement,id_ab integer, name text, place text, service text, type text, factory_num,  accuracy text, next_check text, prev_reading integer, type_reading text, date_reading text, cur_reading integer, comment text, passed integer);");
         db.execSQL("create table result (id integer primary key autoincrement,id_ab integer, id_dev integer, reading integer, place text, comment text, date text);");
         db.execSQL("create table operators (id integer primary key autoincrement, name text, type text);");
+        db.execSQL("create table cont_info_updated (id integer primary key autoincrement,type text,id_ab integer, value text, timestamp integer);");
 
     }
 
@@ -69,6 +70,56 @@ public class DB extends SQLiteOpenHelper {
 
     public void upgradeDB(){
         this.onUpgrade(db,0,1);
+    }
+
+
+    public HashMap<String,String> getCommentAndPlace(int id_dev){
+        db = this.getReadableDatabase();
+        HashMap<String,String> data = new HashMap<String,String>();
+        Cursor c_dev = db.query("result", null, "id_dev = ?", new String[]{Integer.toString(id_dev)}, null, null, null);
+        if (c_dev!=null){
+            if (c_dev.moveToFirst()){
+                int placeIndex = c_dev.getColumnIndex("place");
+                int commentIndex = c_dev.getColumnIndex("comment");
+                do{
+                    data.put("place",c_dev.getString(placeIndex));
+                    data.put("comment",c_dev.getString(commentIndex));
+                }while (c_dev.moveToNext());
+            }
+        }
+        return data;
+    }
+
+    public boolean setCommentAndPlace(int id_dev,String comment, String place, String date){
+        db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put("place", place);
+        cv.put("comment",comment);
+        int updCount = db.update("device", cv, "id = ?", new String[] { Integer.toString(id_dev) });
+        int id_ab = 0;
+        Cursor c_dev = db.query("device", null, "id = ?", new String[]{Integer.toString(id_dev)}, null, null, null);
+        if (c_dev!=null){
+            if (c_dev.moveToFirst()){
+                int id_abIndex = c_dev.getColumnIndex("id_ab");
+                do{
+                    id_ab = c_dev.getInt(id_abIndex);
+                }while (c_dev.moveToNext());
+            }
+        }
+
+        ContentValues res = new ContentValues();
+        res.put("place", place);
+        res.put("comment", comment);
+        updCount = db.update("result", res, "id_ab = ?", new String[] { Integer.toString(id_ab) });
+        if (updCount==0){
+            res.put("id_ab", id_ab);
+            res.put("id_dev", id_dev);
+            res.put("reading", 0);
+            res.put("date", date);
+            db.insert("result", null, res);
+        }
+        return true;
+
     }
 
     public boolean setPassed(int id_dev, String comment, String place, int value, String date){
@@ -118,14 +169,25 @@ public class DB extends SQLiteOpenHelper {
             updCount = db.update("abonent", cv, "id = ?", new String[] { Integer.toString(id_ab) });
         }
         //db.execSQL("create table result (id integer primary key autoincrement,id_ab integer, id_dev integer, reading integer, place text, comment text, date text);");
-        ContentValues res = new ContentValues();
+       /* ContentValues res = new ContentValues();
         res.put("id_ab", id_ab);
         res.put("id_dev", id_dev);
         res.put("reading", value);
         res.put("place", place);
         res.put("comment", comment);
         res.put("date", date);
-        db.insert("result", null, res);
+        db.insert("result", null, res);*/
+        ContentValues res = new ContentValues();
+        res.put("place", place);
+        res.put("comment", comment);
+        updCount = db.update("result", res, "id_ab = ?", new String[] { Integer.toString(id_ab) });
+        if (updCount==0){
+            res.put("id_ab", id_ab);
+            res.put("id_dev", id_dev);
+            res.put("reading", value);
+            res.put("date", date);
+            db.insert("result", null, res);
+        }
         return true;
     }
 
@@ -465,7 +527,7 @@ public class DB extends SQLiteOpenHelper {
                     dev_val.put("next_check", dev.getString("next_check"));
                     dev_val.put("prev_reading", dev.getString("prev_reading"));
                     dev_val.put("type_reading", dev.getString("type_reading"));
-                    dev_val.put("date_reading", dev.getString("date_reading"));
+                    dev_val.put("date_reading", dev.getString("date_reading").replace('T', ' ').replace('Z',' '));
                     dev_val.put("comment", "");
                     dev_val.put("passed", "0");
                     db.insert("device", null, dev_val);
@@ -613,6 +675,77 @@ public class DB extends SQLiteOpenHelper {
         return jarr;
     }
 
+    public HashMap<String,String> getCurrentInfo(int id){
+        db = this.getReadableDatabase();
+        HashMap<String,String> data = new HashMap<String,String>();
+        Cursor c_info = db.query("cont_info_updated", null, "id_ab = ? and timestamp in (select max(timestamp) from cont_info_updated)", new String[]{Integer.toString(id)}, null, null, null);
+        if (c_info!=null){
+            if(c_info.moveToFirst()){
+                int type = c_info.getColumnIndex("type");
+                int value = c_info.getColumnIndex("value");
+                int telcnt = 1;
+                do{
+                    switch (c_info.getString(type)){
+                        case INFO_TEL:
+                            data.put(INFO_TEL+Integer.toString(telcnt),c_info.getString(value));
+                            telcnt++;
+                            break;
+                        case INFO_EMAIL:
+                            data.put(INFO_EMAIL,c_info.getString(value));
+                            break;
+                        /*case INFO_AREA:
+                            Enity.area = c_info.getString(value);
+                            break;
+                        case INFO_LIVING:
+                            Enity.number_of_living = c_info.getString(value);
+                            break;
+                        case INFO_ROOM:
+                            Enity.room = c_info.getString(value);
+                            break;*/
+                    }
+                }while(c_info.moveToNext());
+            }
+        }
+        return data;
+    }
+
+    public boolean setInfo(int id, HashMap<String,String> data){
+        db = this.getWritableDatabase();
+        Date currentDate = new Date(System.currentTimeMillis());
+        long timestamp = currentDate.getTime();;
+       // int delCount = db.delete("cont_info", "id = ? and type = ?" , new String[] { Integer.toString(id), this.INFO_TEL });
+        ContentValues cv = new ContentValues();
+        String value = data.get(this.INFO_TEL + "1");
+        cv.put("value", value);
+        cv.put("id_ab", Integer.toString(id));
+        cv.put("type", this.INFO_TEL);
+        cv.put("timestamp", timestamp);
+        //int updCount = db.update("cont_info", cv, "id_ab = ? and type = ?", new String[] { Integer.toString(id), this.INFO_TEL });
+        long rowID = db.insert("cont_info_updated", null, cv);
+        cv.clear();
+        value = data.get(this.INFO_TEL+"2");
+        cv.put("value", value);
+        cv.put("id_ab", Integer.toString(id));
+        cv.put("type", this.INFO_TEL);
+        cv.put("timestamp", timestamp);
+        rowID = db.insert("cont_info_updated", null, cv);
+        cv.clear();
+        value = data.get(this.INFO_TEL+"3");
+        cv.put("value", value);
+        cv.put("id_ab", Integer.toString(id));
+        cv.put("type", this.INFO_TEL);
+        cv.put("timestamp", timestamp);
+        rowID = db.insert("cont_info_updated", null, cv);
+        cv.clear();
+        cv.put("value", data.get(this.INFO_EMAIL));
+        cv.put("type", this.INFO_EMAIL);
+        cv.put("id_ab", Integer.toString(id));
+        cv.put("timestamp", timestamp);
+        rowID = db.insert("cont_info_updated", null, cv);
+        //int updCount = db.update("cont_info_updated", cv, "id_ab = ? and type = ?", new String[] { Integer.toString(id), this.INFO_EMAIL });
+        return true;
+    }
+
     public void clearData(){
         onUpgrade(db, 1, 1);
 
@@ -621,14 +754,16 @@ public class DB extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersiod, int newVersion){
         db = this.getWritableDatabase();
-        db.execSQL("drop table device");
-        db.execSQL("drop table abonent");
-        db.execSQL("drop table cont_info");
-        db.execSQL("drop table saldo");
-        db.execSQL("drop table result");
-        db.execSQL("drop table operators");
+        try{db.execSQL("drop table device");}catch (Exception ex){}
+        try{db.execSQL("drop table abonent");}catch (Exception ex){}
+        try{db.execSQL("drop table cont_info");}catch (Exception ex){}
+        try{db.execSQL("drop table saldo");}catch (Exception ex){}
+        try{db.execSQL("drop table result");}catch (Exception ex){}
+        try{db.execSQL("drop table operators");}catch (Exception ex){}
+        try{db.execSQL("drop table cont_info_updated");}catch (Exception ex){}
         db.execSQL("create table abonent (id integer primary key autoincrement,name text, account text, address text, count_of_devs integer, passed integer);");
         db.execSQL("create table cont_info (id integer primary key autoincrement,type text,id_ab integer, value text);");
+        db.execSQL("create table cont_info_updated (id integer primary key autoincrement,type text,id_ab integer, value text, timestamp integer);");
         db.execSQL("create table saldo (id integer primary key autoincrement,id_ab integer, row integer, col integer, value text);");
         db.execSQL("create table device (id integer primary key autoincrement,id_ab integer, name text, place text, service text, type text, factory_num,  accuracy text, next_check text, prev_reading integer, type_reading text, date_reading text, cur_reading integer, comment text, passed integer);");
         db.execSQL("create table result (id integer primary key autoincrement,id_ab integer, id_dev integer, reading integer, place text, comment text, date text);");
@@ -651,6 +786,7 @@ public class DB extends SQLiteOpenHelper {
 
         return main;
     }
+
 
     private boolean isEmptyDevice (JSONObject dev) throws Exception{
         boolean u1,u2,u3,u4,u4_1,u5,u6,u7,u8;

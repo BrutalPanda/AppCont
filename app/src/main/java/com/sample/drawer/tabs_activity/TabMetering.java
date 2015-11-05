@@ -145,6 +145,34 @@ public class TabMetering extends Activity  {
 
             }
         });
+        findViewById(R.id.metering_comment).setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    EditText tv5 = (EditText) findViewById(R.id.metering_comment);
+                    String comment = tv5.getText().toString();
+                    TextView tv1 = (TextView) findViewById(R.id.metering_place);
+                    String new_place = tv1.getText().toString();
+                    Date d = new Date();
+                    SimpleDateFormat format1 = new SimpleDateFormat("yyyy.MM.dd hh:mm:ss");
+                    dbase.setCommentAndPlace(data.id, comment, new_place, format1.format(d));
+                }
+            }
+        });
+        findViewById(R.id.metering_place).setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    EditText tv5 = (EditText) findViewById(R.id.metering_comment);
+                    String comment = tv5.getText().toString();
+                    TextView tv1 = (TextView) findViewById(R.id.metering_place);
+                    String new_place = tv1.getText().toString();
+                    Date d = new Date();
+                    SimpleDateFormat format1 = new SimpleDateFormat("yyyy.MM.dd hh:mm:ss");
+                    dbase.setCommentAndPlace(data.id, comment, new_place, format1.format(d));
+                }
+            }
+        });
 
     }
 
@@ -162,7 +190,7 @@ public class TabMetering extends Activity  {
         TextView tv10= (TextView)findViewById(R.id.metering_comment);
         tv9.setTextColor(Color.BLACK);
 
-        tv1.setText(md.place);
+
         tv2.setText(md.type);
         tv3.setText(md.factory_num);
         tv4.setText(md.accuracy);
@@ -171,6 +199,17 @@ public class TabMetering extends Activity  {
         tv7.setText(md.date_reading);
         tv8.setText(md.type_reading);
         tv9.setText(md.cur_reading);
+
+
+        HashMap<String,String> cap = dbase.getCommentAndPlace(md.id);
+        if (cap.size()!=0){
+            try{tv1.setText(cap.get("place"));}catch (Exception ex){ tv1.setText(md.place);}
+            try{tv9.setText(cap.get("comment"));}catch (Exception ex){ tv10.setText("");}
+        }else {
+            tv1.setText(md.place);
+            tv10.setText("");
+        }
+
         Button apply = (Button) findViewById(R.id.ApplyChanges);
 
 

@@ -25,7 +25,7 @@
                 android:layout_margin="2dip"
                 android:clickable="false">
                 <TextView android:text="Место установки"  />
-                <TextView android:id="@+id/metering_place" android:text="sometext" />
+                <EditText android:id="@+id/metering_place" android:text="sometext" />
 
             </TableRow>
             <TableRow

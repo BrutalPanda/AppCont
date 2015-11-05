@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.sample.drawer.MyShitMasterpice.DB;
 import com.sample.drawer.R;
 import com.sample.drawer.utils.MeteringDevice;
 import com.sample.drawer.utils.Unit;
@@ -17,6 +18,7 @@ import com.sample.drawer.utils.Unit;
 import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by Slava-laptop on 27.07.2015.
@@ -27,6 +29,7 @@ public class TabInfo extends Activity implements View.OnClickListener {
     ImageView t3;
     ImageView em;
     Unit data = null;
+    DB dbase = new DB(this);
 
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -48,7 +51,43 @@ public class TabInfo extends Activity implements View.OnClickListener {
         t3.setOnClickListener(this);
         em.setOnClickListener(this);
 
+        findViewById(R.id.account_tel1).setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    setInfoToDB();
+                }
+            }
+        });
+        findViewById(R.id.account_tel2).setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    setInfoToDB();
+                }
+            }
+        });
+        findViewById(R.id.account_tel3).setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    setInfoToDB();
+                }
+            }
+        });
+        findViewById(R.id.account_email).setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    setInfoToDB();
+                }
+            }
+        });
+
+
+
     }
+
 
     @Override
     public void onClick(View v){
@@ -108,16 +147,60 @@ public class TabInfo extends Activity implements View.OnClickListener {
         TextView tv6= (TextView)findViewById(R.id.account_tel2);
         TextView tv7= (TextView)findViewById(R.id.account_tel3);
         TextView tv8= (TextView)findViewById(R.id.account_email);
+        TextView tv9= (TextView)findViewById(R.id.account_ls);
 
-
+        HashMap<String,String> dat = dbase.getCurrentInfo(data.id);
         tv1.setText(enity.FIO);
         tv2.setText(enity.area);
         tv3.setText(enity.room);
         tv4.setText(enity.number_of_living);
-        tv5.setText(enity.tel1);
-        tv6.setText(enity.tel2);
-        tv7.setText(enity.tel3);
-        tv8.setText(enity.email);
+        tv9.setText(enity.account);
+        if (dat.size()>0) {
+            try{
+                tv5.setText(dat.get(dbase.INFO_TEL+"1"));
+            }catch(Exception ex){
+                tv5.setText(enity.tel1);
+            }
+            try{
+                tv6.setText(dat.get(dbase.INFO_TEL+"2"));
+            }catch(Exception ex){
+                tv6.setText(enity.tel2);
+            }
+            try{
+                tv7.setText(dat.get(dbase.INFO_TEL+"3"));
+            }catch(Exception ex){
+                tv7.setText(enity.tel3);
+            }
+            try{
+                tv8.setText(dat.get(dbase.INFO_EMAIL));
+            }catch(Exception ex){
+                tv8.setText(enity.email);
+            }
+        }else {
+            tv5.setText(enity.tel1);
+            tv6.setText(enity.tel2);
+            tv7.setText(enity.tel3);
+            tv8.setText(enity.email);
+        }
 
+    }
+
+
+
+    private void setInfoToDB(){
+        HashMap<String,String> dat = new HashMap<String,String>();
+        TextView tv = (TextView) findViewById(R.id.account_email);
+        dat.put(dbase.INFO_EMAIL,tv.getText().toString());
+        //Toast.makeText(this, tv.getText(), Toast.LENGTH_SHORT);
+        tv = (TextView) findViewById(R.id.account_tel1);
+        dat.put(dbase.INFO_TEL + "2",tv.getText().toString());
+        //Toast.makeText(this, tv.getText(), Toast.LENGTH_SHORT);
+        tv = (TextView) findViewById(R.id.account_tel2);
+        dat.put(dbase.INFO_TEL+"3",tv.getText().toString());
+        //Toast.makeText(this,tv.getText(),Toast.LENGTH_SHORT);
+        tv = (TextView) findViewById(R.id.account_tel3);
+        dat.put(dbase.INFO_TEL + "1",tv.getText().toString());
+        //Toast.makeText(this,tv.getText(),Toast.LENGTH_SHORT);
+        dbase.setInfo(data.id, dat);
     }
 }
