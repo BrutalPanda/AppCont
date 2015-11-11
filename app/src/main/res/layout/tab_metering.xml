@@ -50,6 +50,14 @@
                 android:baselineAligned="true"
                 android:layout_margin="2dip"
                 android:clickable="false">
+                <TextView android:text="Услуга"  />
+                <TextView android:id="@+id/metering_service" android:text="sometext" />
+
+            </TableRow>
+            <TableRow
+                android:baselineAligned="true"
+                android:layout_margin="2dip"
+                android:clickable="false">
                 <TextView android:text="Количество знаков"  />
                 <TextView android:id="@+id/metering_accuracy" android:text="sometext" />
 

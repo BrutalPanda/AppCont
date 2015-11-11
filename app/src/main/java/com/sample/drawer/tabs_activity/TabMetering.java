@@ -188,6 +188,7 @@ public class TabMetering extends Activity  {
         TextView tv8= (TextView)findViewById(R.id.metering_type_reading);
         TextView tv9= (TextView)findViewById(R.id.metering_current_reading);
         TextView tv10= (TextView)findViewById(R.id.metering_comment);
+        TextView tv11= (TextView)findViewById(R.id.metering_service);
         tv9.setTextColor(Color.BLACK);
 
 
@@ -199,12 +200,13 @@ public class TabMetering extends Activity  {
         tv7.setText(md.date_reading);
         tv8.setText(md.type_reading);
         tv9.setText(md.cur_reading);
+        tv11.setText(md.service);
 
 
         HashMap<String,String> cap = dbase.getCommentAndPlace(md.id);
         if (cap.size()!=0){
             try{tv1.setText(cap.get("place"));}catch (Exception ex){ tv1.setText(md.place);}
-            try{tv9.setText(cap.get("comment"));}catch (Exception ex){ tv10.setText("");}
+            try{tv10.setText(cap.get("comment"));}catch (Exception ex){ tv10.setText("");}
         }else {
             tv1.setText(md.place);
             tv10.setText("");
@@ -250,7 +252,7 @@ public class TabMetering extends Activity  {
         ArrayList<MeteringDevice> mds = data.devices;
         String names[] = new String[data.devices.size()];
         for (int i=0;i<data.devices.size();i++){
-            names[i] = data.devices.get(i).name;
+            names[i] = data.devices.get(i).name+" - "+data.devices.get(i).service;
         }
         return names;
     }

@@ -50,8 +50,10 @@ public class Fragment3 extends Fragment {
         restoreButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dbase.clearData();
 
+                dbase.clearData();
+                Toast.makeText(getActivity(), "Очистка завершена! Приложение будет закрыто", Toast.LENGTH_SHORT).show();
+                System.exit(1);
             }
         });
 

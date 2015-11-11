@@ -1,14 +1,18 @@
 package com.sample.drawer.MyShitMasterpice;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
-
+import android.widget.ProgressBar;
 import com.sample.drawer.MainActivity;
+import com.sample.drawer.R;
 import com.sample.drawer.utils.MeteringDevice;
 import com.sample.drawer.utils.Saldo;
 import com.sample.drawer.utils.Unit;
@@ -24,6 +28,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import android.os.Handler;
 
 /**
  * Created by Slava-laptop on 16.10.2015.
@@ -35,6 +40,10 @@ public class DB extends SQLiteOpenHelper {
     String CONTROLLER = "cont";
     String DISPATCHER = "disp";
     final String INFO_AREA = "area";
+    ProgressBar pbCount;
+    ProgressDialog pd;
+    int cnt;
+    Handler h;
     final String INFO_ROOM = "room";
     public final String INFO_TEL = "tel";
     public final String INFO_EMAIL = "email";
@@ -477,14 +486,13 @@ public class DB extends SQLiteOpenHelper {
         return true;
     }
 
-    public boolean fillTables(String json_data) throws Exception{
-        try {
+    public JSONArray getSource(String json_data) throws Exception{
+        return new JSONArray(json_data);
+    }
 
-            db = this.getWritableDatabase();
-            JSONArray jarray = new JSONArray(json_data);
-            Log.d("array:::","Количество элементов = "+jarray.length());
-            ArrayList<HashMap<String, String>> enities = new ArrayList<HashMap<String, String>>();
-            JSONObject ops = jarray.getJSONObject(0);
+    public boolean preFillRecord(JSONObject ops){
+        db = this.getWritableDatabase();
+        try {
             ContentValues cont = new ContentValues();
             cont.put("name", ops.getString("FIO_cont"));
             cont.put("type", this.CONTROLLER);
@@ -498,110 +506,148 @@ public class DB extends SQLiteOpenHelper {
             pass.put("id_ab", "-1");
             pass.put("value", ops.getString("password"));
             db.insert("cont_info", null, pass);
+        } catch (Exception ex){
+            return false;
+        }
+        return true;
+    }
+
+    public boolean fillTables(String json_data, Activity activity) throws Exception{
+        try {
+
+            final JSONArray jarray = new JSONArray(json_data);
+            Log.d("array:::","Количество элементов = "+jarray.length());
+
+            JSONObject ops = jarray.getJSONObject(0);
+
+
+
+            /*pbCount = (ProgressBar) activity.findViewById(R.id.pbCount);
+            pbCount = new ProgressDialog(activity)
+            pbCount.setMax(jarray.length());
+            pbCount.setProgress(0);*/
+
+
+
+
+
 
         /*   db.execSQL("create table device (id integer primary key autoincrement,id_ab integer, name text, place text, service text, type text" +
                 "fact_num text,accuracy text, next_check text, prev_reading integer, type_reading text, cur_reading integer, comment text, passed integer);");*/
-            for (int i = 1; i < jarray.length(); i++) {
-                Log.d("array:::","Элемент = "+i);
-                ContentValues enity = new ContentValues();
-                JSONObject c = jarray.getJSONObject(i);
-               // enity.put("id", Integer.toString(i));
-                enity.put("name", c.getString("FIO"));
-                enity.put("account", c.getString("account"));
-                enity.put("address", c.getString("address"));
-                JSONArray devs = c.getJSONArray("devices");
-                enity.put("count_of_devs", Integer.toString(devs.length()));
-                enity.put("passed", "0");
-                long id = db.insert("abonent", null, enity);
-                for (int j = 0; j < devs.length(); j++) {
-                    JSONObject dev = devs.getJSONObject(j);
-                    if (isEmptyDevice(dev)) {continue;}
-                    ContentValues dev_val = new ContentValues();
-                    dev_val.put("name", dev.getString("name"));
-                    dev_val.put("id_ab", Long.toString(id));
-                    dev_val.put("place", dev.getString("place"));
-                    dev_val.put("service", dev.getString("service"));
-                    dev_val.put("type", dev.getString("type"));
-                    dev_val.put("factory_num", dev.getString("factory_num"));
-                    dev_val.put("accuracy", dev.getString("accuracy"));
-                    dev_val.put("next_check", dev.getString("next_check"));
-                    dev_val.put("prev_reading", dev.getString("prev_reading"));
-                    dev_val.put("type_reading", dev.getString("type_reading"));
-                    dev_val.put("date_reading", dev.getString("date_reading").replace('T', ' ').replace('Z',' '));
-                    dev_val.put("comment", "");
-                    dev_val.put("passed", "0");
-                    db.insert("device", null, dev_val);
-                }
-                // db.execSQL("create table cont_info (id integer primary key autoincrement,type text,id_ab integer, value text);");
-                ContentValues info = new ContentValues();
-                info.put("id_ab",Long.toString(id));
-                info.put("type", this.INFO_AREA);
-                info.put("value", c.getString("area"));
-                db.insert("cont_info", null, info);
-                info.clear();
 
-                info.put("id_ab", Long.toString(id));
-                info.put("type", this.INFO_ROOM);
-                info.put("value", c.getString("room"));
-                db.insert("cont_info", null, info);
-                info.clear();
-
-                for (int k = 1; k < 10; k++) {
-                    try {
-                        info.put("id_ab",Long.toString(id));
-                        info.put("type", this.INFO_TEL);
-                        info.put("value", c.getString("tel" + Integer.toString(k)));
-                        db.insert("cont_info", null, info);
-                        info.clear();
-                    } catch (Exception ex) {
-                        break;
-                    }
-                }
-
-                info.put("id_ab", Long.toString(id));
-                info.put("type", this.INFO_EMAIL);
-                info.put("value", c.getString("email"));
-                db.insert("cont_info", null, info);
-                info.clear();
-
-                info.put("id_ab",Long.toString(id));
-                info.put("type", this.INFO_LIVING);
-                info.put("value", c.getString("number_of_living"));
-                db.insert("cont_info", null, info);
-                info.clear();
-
-                JSONObject s = c.getJSONObject("saldo");
-                //  db.execSQL("create table saldo (id integer primary key autoincrement,id_ab integer, row integer, col integer);");
-                int cols = Integer.parseInt(s.getJSONObject("info").getString("count_cols"));
-                int rows = Integer.parseInt(s.getJSONObject("info").getString("count_rows"));
-                JSONObject header = s.getJSONObject("header");
-                for (int k = 0; k < cols; k++) {
-                    ContentValues cell = new ContentValues();
-                    cell.put("row", "0");
-                    cell.put("col", Integer.toString(k));
-                    cell.put("id_ab", Long.toString(id));
-                    cell.put("value", header.getString("i" + Integer.toString(k)));
-                    db.insert("saldo", null, cell);
-                }
-                for (int l = 0; l < rows; l++) {
-                    JSONObject row = s.getJSONObject("i" + Integer.toString(l));
-                    for (int k = 0; k < cols; k++) {
-                        ContentValues cell = new ContentValues();
-                        cell.put("row", Integer.toString(l + 1));
-                        cell.put("col", Integer.toString(k));
-                        cell.put("id_ab", Long.toString(id));
-                        cell.put("value", row.getString("i" + Integer.toString(k)));
-                        db.insert("saldo", null, cell);
-                    }
-                }
-
-
-            }
         } catch (Exception ex){
             ex.printStackTrace();
             return false;
         }
 
+
+        return true;
+    }
+
+
+
+    public boolean fillRecord(JSONObject c) throws Exception{
+        ContentValues enity = new ContentValues();
+        //JSONObject c = jarray.getJSONObject(i);
+        // enity.put("id", Integer.toString(i));
+        enity.put("name", c.getString("FIO"));
+        enity.put("account", c.getString("account"));
+        enity.put("address", c.getString("address"));
+        JSONArray devs = c.getJSONArray("devices");
+
+        enity.put("passed", "0");
+        int devs_cnt = 0;
+        for (int j = 0; j < devs.length(); j++) {
+            JSONObject dev = devs.getJSONObject(j);
+            if (isEmptyDevice(dev)) {continue;}
+            devs_cnt++;
+        }
+        enity.put("count_of_devs", Integer.toString(devs_cnt));
+        long id = db.insert("abonent", null, enity);
+        for (int j = 0; j < devs.length(); j++) {
+            JSONObject dev = devs.getJSONObject(j);
+            if (isEmptyDevice(dev)) {continue;}
+            ContentValues dev_val = new ContentValues();
+            dev_val.put("name", dev.getString("name"));
+            dev_val.put("id_ab", Long.toString(id));
+            dev_val.put("place", dev.getString("place"));
+            dev_val.put("service", dev.getString("service"));
+            dev_val.put("type", dev.getString("type"));
+            dev_val.put("factory_num", dev.getString("factory_num"));
+            dev_val.put("accuracy", dev.getString("accuracy"));
+            dev_val.put("next_check", dev.getString("next_check"));
+            dev_val.put("prev_reading", dev.getString("prev_reading"));
+            dev_val.put("type_reading", dev.getString("type_reading"));
+            dev_val.put("date_reading", dev.getString("date_reading").replace('T', ' ').replace('Z', ' '));
+            dev_val.put("comment", "");
+            dev_val.put("passed", "0");
+            devs_cnt++;
+            db.insert("device", null, dev_val);
+
+        }
+
+        // db.execSQL("create table cont_info (id integer primary key autoincrement,type text,id_ab integer, value text);");
+        ContentValues info = new ContentValues();
+        info.put("id_ab",Long.toString(id));
+        info.put("type", this.INFO_AREA);
+        info.put("value", c.getString("area"));
+        db.insert("cont_info", null, info);
+        info.clear();
+
+        info.put("id_ab", Long.toString(id));
+        info.put("type", this.INFO_ROOM);
+        info.put("value", c.getString("room"));
+        db.insert("cont_info", null, info);
+        info.clear();
+
+        for (int k = 1; k < 10; k++) {
+            try {
+                info.put("id_ab",Long.toString(id));
+                info.put("type", this.INFO_TEL);
+                info.put("value", c.getString("tel" + Integer.toString(k)));
+                db.insert("cont_info", null, info);
+                info.clear();
+            } catch (Exception ex) {
+                break;
+            }
+        }
+
+        info.put("id_ab", Long.toString(id));
+        info.put("type", this.INFO_EMAIL);
+        info.put("value", c.getString("email"));
+        db.insert("cont_info", null, info);
+        info.clear();
+
+        info.put("id_ab",Long.toString(id));
+        info.put("type", this.INFO_LIVING);
+        info.put("value", c.getString("number_of_living"));
+        db.insert("cont_info", null, info);
+        info.clear();
+
+        JSONObject s = c.getJSONObject("saldo");
+        //  db.execSQL("create table saldo (id integer primary key autoincrement,id_ab integer, row integer, col integer);");
+        int cols = Integer.parseInt(s.getJSONObject("info").getString("count_cols"));
+        int rows = Integer.parseInt(s.getJSONObject("info").getString("count_rows"));
+        JSONObject header = s.getJSONObject("header");
+        for (int k = 0; k < cols; k++) {
+            ContentValues cell = new ContentValues();
+            cell.put("row", "0");
+            cell.put("col", Integer.toString(k));
+            cell.put("id_ab", Long.toString(id));
+            cell.put("value", header.getString("i" + Integer.toString(k)));
+            db.insert("saldo", null, cell);
+        }
+        for (int l = 0; l < rows; l++) {
+            JSONObject row = s.getJSONObject("i" + Integer.toString(l));
+            for (int k = 0; k < cols; k++) {
+                ContentValues cell = new ContentValues();
+                cell.put("row", Integer.toString(l + 1));
+                cell.put("col", Integer.toString(k));
+                cell.put("id_ab", Long.toString(id));
+                cell.put("value", row.getString("i" + Integer.toString(k)));
+                db.insert("saldo", null, cell);
+            }
+        }
         return true;
     }
 
@@ -634,10 +680,34 @@ public class DB extends SQLiteOpenHelper {
                         if(c_ab.moveToFirst()){
                             int accIndex = c_ab.getColumnIndex("account");
                             int fioIndex = c_ab.getColumnIndex("name");
+
+
                             JSONObject jobj = new JSONObject();
                             do{
                                 jobj.put("fio", c_ab.getString(fioIndex));
                                 jobj.put("ls", c_ab.getString(accIndex));
+                                JSONArray tels = new JSONArray();
+                                Cursor c_info = db.query("cont_info_updated",null,"id_ab = ? and timestamp in (select max(timestamp) from cont_info_updated)", new String[]{Integer.toString(id)},null,null,null);
+                                if(c_info!=null){
+                                    if(c_info.moveToFirst()){
+                                        int valueIndex = c_info.getColumnIndex("value");
+                                        int typeIndex = c_info.getColumnIndex("type");
+
+                                        do{
+                                            String type = c_info.getString(typeIndex);
+                                           /* switch (type){
+                                                case this.INFO_TEL:
+                                            }*/
+                                            if (type.equals(this.INFO_TEL)){
+                                                tels.put(c_info.getString(valueIndex));
+                                            }else if(type.equals(this.INFO_EMAIL)){
+                                                jobj.put("email",c_info.getString(valueIndex));
+                                            }
+                                        }while(c_info.moveToNext());
+                                    }
+                                }
+                                jobj.put("tels",tels);
+
                                 Cursor c_res = db.rawQuery("select DEV.id_ab as id_ab, DEV.factory_num as num, DEV.place as place, RES.reading as reading, RES.date as date, RES.comment as comment" +
                                         " from device as DEV " +
                                         "inner join result as RES " +

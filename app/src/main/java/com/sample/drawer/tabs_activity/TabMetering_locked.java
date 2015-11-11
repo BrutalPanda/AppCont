@@ -117,6 +117,7 @@ public class TabMetering_locked extends Activity {
         TextView tv8= (TextView)findViewById(R.id.metering_type_reading);
         TextView tv9= (TextView)findViewById(R.id.metering_current_reading);
         TextView tv10= (TextView)findViewById(R.id.metering_comment);
+        TextView tv11= (TextView)findViewById(R.id.metering_service);
         tv9.setTextColor(Color.BLACK);
 
         tv1.setText(md.place);
@@ -129,6 +130,7 @@ public class TabMetering_locked extends Activity {
         tv8.setText(md.type_reading);
         tv9.setText(md.cur_reading);
         tv10.setText(md.comment);
+        tv11.setText(md.service);
 
 
         try {
@@ -154,7 +156,7 @@ public class TabMetering_locked extends Activity {
         ArrayList<MeteringDevice> mds = data.devices;
         String names[] = new String[data.devices.size()];
         for (int i=0;i<data.devices.size();i++){
-            names[i] = data.devices.get(i).name;
+            names[i] = data.devices.get(i).name+" - "+data.devices.get(i).service;
         }
         return names;
     }

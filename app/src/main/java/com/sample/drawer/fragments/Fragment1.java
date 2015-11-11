@@ -4,6 +4,8 @@ import android.app.ExpandableListActivity;
 import android.app.LauncherActivity;
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -15,6 +17,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -46,6 +50,7 @@ import com.sample.drawer.MainActivity;
 import com.sample.drawer.MyShitMasterpice.DB;
 import com.sample.drawer.MyShitMasterpice.GPSTracker;
 
+import com.sample.drawer.MyShitMasterpice.OpenFileDialog;
 import com.sample.drawer.R;
 import com.sample.drawer.utils.MeteringDevice;
 import com.sample.drawer.utils.Order;
@@ -63,7 +68,10 @@ public class Fragment1 extends Fragment {
 
     private static final String TAG = "myLogs";
     private ArrayList<String> strings = new ArrayList<String>();
-
+    String FILENAME = "";
+    ProgressDialog pd;
+    int cnt;
+    Handler h;
     private ArrayList<Order> m_orders = null;
     private OrderAdapter m_adapter;
     private OrderAdapter m_adapter_dub;
@@ -84,42 +92,131 @@ public class Fragment1 extends Fragment {
 
         ListView lvf1 = (ListView) rootView.findViewById(R.id.lvMain);
         DB dbase = new DB(thiscontainer.getContext());
-        try {
-            Units = dbase.makeUnits(0);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Toast.makeText(thiscontainer.getContext(),"Ошибка базы",Toast.LENGTH_LONG);
-        }
-        m_orders = new ArrayList<Order>();
-        this.m_adapter = new OrderAdapter(thiscontainer.getContext(), R.layout.listview_row, m_orders);
-        this.m_adapter_dub = this.m_adapter;
+        h = new Handler();
 
-        search = (AutoCompleteTextView) rootView.findViewById(R.id.search);
-        lvf1.setAdapter(this.m_adapter);
+        pd = new ProgressDialog(thiscontainer.getContext());
+        pd.setTitle("Заполнение базы данных");
+        pd.setMessage("Пожалуйста дождитесь окончания операции!");
+        pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+
+        if (dbase.isEmpty()) {
+            Toast.makeText(thiscontainer.getContext(), "База данных пуста! Выберите файл для загрузки.", Toast.LENGTH_LONG).show();
+            OpenFileDialog fileDialog = new OpenFileDialog(thiscontainer.getContext());
+            fileDialog.setOpenDialogListener(new OpenFileDialog.OpenDialogListener(){
+                @Override
+                public void OnSelectedFile(String fileName){
+                    FILENAME = fileName;
+                    final DB dbase = new DB(thiscontainer.getContext());
+                    //Toast.makeText(getApplicationContext(), fileName, Toast.LENGTH_LONG).show();
+                    try {
+                        String source = readFile();
+                        dbase.clearData();
+                        final JSONArray jarr = dbase.getSource(source);
+                        boolean pre = dbase.preFillRecord(jarr.getJSONObject(0));
+
+                        pd.setMax(jarr.length() - 1);
+                        //pd.setIndeterminate(true);
+                        pd.show();
+
+                        Thread t = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                for (int i = 1; i < jarr.length(); i++) {
+                                    Log.d("array:::", "Элемент = " + i);
+                                    cnt = i;
+                                    try {
+                                        dbase.fillRecord(jarr.getJSONObject(i));
+                                    } catch (Exception ex) {
+                                    }
+                                    //try{TimeUnit.MILLISECONDS.sleep(100);}catch(Exception ex){ex.printStackTrace();};
+                                    h.post(updateProgress);
+                                }
+                            }
+                        });
+
+                        t.start();
+                        ListView lvf1 = (ListView) rootView.findViewById(R.id.lvMain);
+
+                        try {
+                            Units = dbase.makeUnits(0);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Toast.makeText(thiscontainer.getContext(),"Ошибка базы",Toast.LENGTH_LONG);
+                        }
+                        m_orders = new ArrayList<Order>();
+
+                        m_adapter = new OrderAdapter(thiscontainer.getContext(), R.layout.listview_row, m_orders);
+                        m_adapter_dub = m_adapter;
+
+                        search = (AutoCompleteTextView) rootView.findViewById(R.id.search);
+                        lvf1.setAdapter(m_adapter);
 
 
 
 
-        viewOrders = new Runnable(){
-            @Override
-            public void run() {
-                getOrders();
+                        viewOrders = new Runnable(){
+                            @Override
+                            public void run() {
+                                getOrders();
+                            }
+                        };
+                        Thread thread =  new Thread(null, viewOrders, "MagentoBackground");
+                        thread.start();
+
+                        try {
+                            thread.join();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                       // ArrayAdapter<String> common = new ArrayAdapter<String>(thiscontainer.getContext(),R.layout.search_common_row,getCommonStrings());
+                       // search.setAdapter(common);
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
+                }
+            });
+            fileDialog.show();
+
+
+        }else {
+
+
+            try {
+                Units = dbase.makeUnits(0);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast.makeText(thiscontainer.getContext(), "Ошибка базы", Toast.LENGTH_LONG);
             }
-        };
-        Thread thread =  new Thread(null, viewOrders, "MagentoBackground");
-        thread.start();
+            m_orders = new ArrayList<Order>();
+            this.m_adapter = new OrderAdapter(thiscontainer.getContext(), R.layout.listview_row, m_orders);
+            this.m_adapter_dub = this.m_adapter;
 
-        try {
-            thread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+
+            lvf1.setAdapter(this.m_adapter);
+
+
+            viewOrders = new Runnable() {
+                @Override
+                public void run() {
+                    getOrders();
+                }
+            };
+            Thread thread = new Thread(null, viewOrders, "MagentoBackground");
+            thread.start();
+
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+
+
         }
-
-        ArrayAdapter<String> common = new ArrayAdapter<String>(thiscontainer.getContext(),R.layout.search_common_row,getCommonStrings());
+        search = (AutoCompleteTextView) rootView.findViewById(R.id.search);
+        ArrayAdapter<String> common = new ArrayAdapter<String>(thiscontainer.getContext(), R.layout.search_common_row, getCommonStrings());
         search.setAdapter(common);
-
-
-
 
         search.addTextChangedListener(new TextWatcher() {
             @Override
@@ -214,6 +311,17 @@ public class Fragment1 extends Fragment {
     }
 
 
+    Runnable updateProgress = new Runnable(){
+        public void run(){
+            if (cnt<pd.getMax()){
+                pd.setProgress(cnt);
+            }else{
+                pd.hide();
+            }
+
+            //pbCount.setProgress(cnt);
+        }
+    };
 
     private String[] getCommonStrings (){
         String [] ret = new String[strings.size()];
@@ -259,6 +367,27 @@ public class Fragment1 extends Fragment {
     };
 
 
+    String readFile() {
+        String ret = "";
+        try {
+            File source = new File(Environment.getExternalStorageDirectory().getAbsoluteFile(), "file");
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(source)));
+            String str = "";
+            // читаем содержимое
+            while ((str = br.readLine()) != null) {
+                ret = ret + str;
+                Log.d(LOG_TAG, "Readed: " + str);
+            }
+            return ret;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+        }
+        return ret;
+    }
 
 
 
